@@ -1,0 +1,65 @@
+ chef generate cookbook cookbooks/apache
+chef generate recipe cookbooks/apache/ server
+chef exec ruby -c server.rb
+chef-client -z server.rb
+
+ chef-client -z -r "recipe[apache::server],recipe[worstation::setup]" >>> multiple recipes 
+
+/root/cookbooks/workstation/recipes
+
+include_recipe method
+
+vi default.rb
+
+
+[root@ip-172-31-25-233 recipes]# cat default.rb
+#
+# Cookbook:: workstation
+# Recipe:: default
+#
+# Copyright:: 2019, The Authors, All Rights Reserved.
+
+include_recipe 'workstation::setup'
+:wq
+
+
+chef-client -z -r "recipe[workstation]" >>local mode
+
+chef-client -z -r "recipe[apache]" >> recipe[cookbook:default] 
+
+
+#####Including the erb File#####
+
+chef generate template cookbooks/workstation motd
+
+cd cookbooks/workstation/templates/
+
+vi motd.erb
+
+This server is the property of Chef
+   HOSTNAME: <%= node['hostname'] %>
+   IPADDRESS: <%= node['ipaddress'] %>
+   CPU: <%= node['cpu']['0']['mhz'] %>
+   MEMORY: <%= node['memory']['total'] %>
+
+cd recipes/
+vi setup.rb
+
+template '/etc/motd' do
+  source 'motd.erb'
+  action :create
+end
+
+
+chef-client -zr "recipe[workstation]"
+
+vi metadata.rb
+git add .
+git commit -m "motd changes in the file"
+git status
+
+
+
+
+
+
